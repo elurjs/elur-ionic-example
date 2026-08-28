@@ -1,9 +1,9 @@
 {
-  "name": "nix-ionic-example",
+  "name": "elur-ionic-example",
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Complete example app using @deijose/nix-ionic — tabs, overlays, cache policies, page-state, Capacitor.",
+  "description": "Complete example app using @elurjs/ionic — tabs, overlays, cache policies, page-state, Capacitor.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,20 +11,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@deijose/nix-js": "^3.5.0",
-    "@deijose/nix-ionic": "^2.0.1",
+    "@elurjs/ionic": "^2.0.7",
+    "@elurjs/core": "^3.5.0",
     "@ionic/core": "^8.0.0",
     "ionicons": "^8.0.0"
   },
   "optionalDependencies": {
-    "@capacitor/core": "^6.0.0",
     "@capacitor/app": "^6.0.0",
-    "@capacitor/status-bar": "^6.0.0",
-    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/haptics": "^6.0.0",
     "@capacitor/keyboard": "^6.0.0",
-    "@capacitor/haptics": "^6.0.0"
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "typescript": "~5.9.3",
     "vite": "^8.0.0"
   }

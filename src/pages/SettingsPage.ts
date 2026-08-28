@@ -1,16 +1,13 @@
 /**
- * SettingsPage — demonstrates:
- *   - cache: false (page remounts fresh every visit)
- *   - Toggle/Select/Range form controls
- *   - Navigation to sub-page (/settings/about)
+ * SettingsPage — modern settings with grouped sections and dark mode toggle.
  */
-import { html, signal, nixRouter } from "@deijose/nix-js";
+import { html, signal, elurRouter } from "@elurjs/core";
 import {
     IonPage,
     IonBackButton,
     createToast,
     type PageContext,
-} from "@deijose/nix-ionic";
+} from "@elurjs/ionic";
 
 const toast = createToast();
 
@@ -26,9 +23,12 @@ export class SettingsPage extends IonPage {
     }
 
     override ionViewWillEnter() {
-        // Because cache: false, this runs fresh on every visit
         this.mountCount.value++;
-        console.log("[settings] fresh mount #", this.mountCount.value);
+    }
+
+    private toggleDarkMode() {
+        this.darkMode.value = !this.darkMode.value;
+        document.documentElement.classList.toggle("ion-palette-dark", this.darkMode.value);
     }
 
     private async saveSettings() {
@@ -41,7 +41,7 @@ export class SettingsPage extends IonPage {
     }
 
     override render() {
-        const isAbout = window.location.hash.includes("/about");
+        const isAbout = window.location.pathname.includes("/about");
 
         return html`
             <ion-header>
@@ -64,30 +64,32 @@ export class SettingsPage extends IonPage {
 
     private renderSettings() {
         return html`
-            <ion-list lines="full">
-                <ion-list-header>
-                    <ion-label>Appearance</ion-label>
-                </ion-list-header>
+            <!-- Appearance -->
+            <h2 class="section-title">Appearance</h2>
+            <p class="section-subtitle">Customize how the app looks</p>
 
+            <ion-list lines="full">
                 <ion-item>
-                    <ion-icon slot="start" name="moon-outline"></ion-icon>
+                    <div slot="start" class="icon-circle icon-circle-primary">
+                        <ion-icon name="moon-outline"></ion-icon>
+                    </div>
                     <ion-toggle
-                        .checked=${() => this.darkMode.value}
-                        @ionChange=${(e: CustomEvent) => {
-                this.darkMode.value = (e.target as HTMLIonToggleElement).checked;
-            }}
+                        checked=${() => this.darkMode.value}
+                        @ionChange=${() => this.toggleDarkMode()}
                     >
                         Dark Mode
                     </ion-toggle>
                 </ion-item>
 
                 <ion-item>
-                    <ion-icon slot="start" name="text-outline"></ion-icon>
+                    <div slot="start" class="icon-circle icon-circle-secondary">
+                        <ion-icon name="text-outline"></ion-icon>
+                    </div>
                     <ion-range
                         min="12"
                         max="24"
                         step="1"
-                        .value=${() => this.fontSize.value}
+                        value=${() => this.fontSize.value}
                         @ionChange=${(e: CustomEvent) => {
                 const val = (e.target as HTMLIonRangeElement).value;
                 this.fontSize.value = typeof val === "number" ? val : 14;
@@ -98,15 +100,17 @@ export class SettingsPage extends IonPage {
                 </ion-item>
             </ion-list>
 
-            <ion-list lines="full">
-                <ion-list-header>
-                    <ion-label>Notifications</ion-label>
-                </ion-list-header>
+            <!-- Notifications -->
+            <h2 class="section-title">Notifications</h2>
+            <p class="section-subtitle">Manage your alerts</p>
 
+            <ion-list lines="full">
                 <ion-item>
-                    <ion-icon slot="start" name="notifications-outline"></ion-icon>
+                    <div slot="start" class="icon-circle icon-circle-warning">
+                        <ion-icon name="notifications-outline"></ion-icon>
+                    </div>
                     <ion-toggle
-                        .checked=${() => this.notifications.value}
+                        checked=${() => this.notifications.value}
                         @ionChange=${(e: CustomEvent) => {
                 this.notifications.value = (e.target as HTMLIonToggleElement).checked;
             }}
@@ -116,90 +120,129 @@ export class SettingsPage extends IonPage {
                 </ion-item>
             </ion-list>
 
-            <ion-list lines="full">
-                <ion-list-header>
-                    <ion-label>Language</ion-label>
-                </ion-list-header>
+            <!-- Language -->
+            <h2 class="section-title">Language</h2>
+            <p class="section-subtitle">Interface language</p>
 
+            <ion-list lines="full">
                 <ion-item>
-                    <ion-icon slot="start" name="language-outline"></ion-icon>
+                    <div slot="start" class="icon-circle icon-circle-success">
+                        <ion-icon name="language-outline"></ion-icon>
+                    </div>
                     <ion-select
                         label="Interface language"
-                        .value=${() => this.language.value}
+                        label-placement="stacked"
+                        value=${() => this.language.value}
                         @ionChange=${(e: CustomEvent) => {
                 this.language.value = (e.target as HTMLIonSelectElement).value ?? "en";
             }}
                     >
                         <ion-select-option value="en">English</ion-select-option>
-                        <ion-select-option value="es">Español</ion-select-option>
-                        <ion-select-option value="fr">Français</ion-select-option>
+                        <ion-select-option value="es">Espanol</ion-select-option>
+                        <ion-select-option value="fr">Francais</ion-select-option>
                         <ion-select-option value="de">Deutsch</ion-select-option>
                     </ion-select>
                 </ion-item>
             </ion-list>
 
-            <div class="ion-padding">
+            <!-- Actions -->
+            <div style="padding: 16px;">
                 <ion-button expand="block" @click=${() => this.saveSettings()}>
+                    <ion-icon slot="start" name="save-outline"></ion-icon>
                     Save Settings
                 </ion-button>
+            </div>
+            <div style="padding: 0 16px 8px;">
                 <ion-button
                     expand="block"
                     fill="outline"
-                    class="ion-margin-top"
-                    @click=${() => nixRouter().navigate("/settings/about")}
+                    @click=${() => elurRouter().navigate("/settings/about")}
                 >
+                    <ion-icon slot="start" name="information-circle-outline"></ion-icon>
                     About this app
                 </ion-button>
             </div>
 
-            <p class="ion-padding" style="color: var(--ion-color-medium); text-align: center;">
-                Fresh mounts: ${() => this.mountCount.value}
-                <br />
-                <small>(cache: false — state resets on leave)</small>
-            </p>
+            <!-- Debug info -->
+            <div style="padding: 24px 16px; text-align: center;">
+                <ion-note color="medium" style="display: block; margin-bottom: 4px;">
+                    Fresh mounts: ${() => this.mountCount.value}
+                </ion-note>
+                <ion-note color="medium" style="font-size: 12px;">
+                    (cache: false - state resets on leave)
+                </ion-note>
+            </div>
+
+            <div class="app-spacer"></div>
         `;
     }
 
     private renderAbout() {
         return html`
-            <ion-content class="ion-padding">
-                <div style="text-align: center; margin-top: 32px;">
-                    <ion-icon
-                        name="logo-ionic"
-                        style="font-size: 72px; color: var(--ion-color-primary);"
-                    ></ion-icon>
-                    <h1>nix-ionic Example</h1>
-                    <p>Version 1.0.0</p>
-                    <p style="color: var(--ion-color-medium);">
-                        Built with @deijose/nix-ionic 2.0.0<br />
-                        Powered by Nix.js + Ionic Core 8
-                    </p>
-                </div>
+            <div class="hero-card" style="text-align: center;">
+                <ion-icon
+                    name="sparkles"
+                    style="font-size: 56px; color: #fff; margin-bottom: 12px;"
+                ></ion-icon>
+                <h1 style="font-size: 24px; font-weight: 800;">elur-ionic</h1>
+                <p style="font-size: 15px;">Version 2.0.5</p>
+                <p style="font-size: 13px; opacity: 0.8; margin-top: 8px;">
+                    Built with @elurjs/ionic<br />
+                    Powered by Elur + Ionic Core 8
+                </p>
+            </div>
 
-                <ion-list lines="none" class="ion-margin-top">
-                    <ion-item>
-                        <ion-icon slot="start" name="code-slash-outline"></ion-icon>
-                        <ion-label>
-                            <h3>Tree-shakeable</h3>
-                            <p>Only the components you use are bundled</p>
-                        </ion-label>
-                    </ion-item>
-                    <ion-item>
-                        <ion-icon slot="start" name="flash-outline"></ion-icon>
-                        <ion-label>
-                            <h3>Signal-based</h3>
-                            <p>Fine-grained reactivity, no virtual DOM</p>
-                        </ion-label>
-                    </ion-item>
-                    <ion-item>
-                        <ion-icon slot="start" name="phone-portrait-outline"></ion-icon>
-                        <ion-label>
-                            <h3>Capacitor ready</h3>
-                            <p>Optional native plugins, zero web cost</p>
-                        </ion-label>
-                    </ion-item>
-                </ion-list>
-            </ion-content>
+            <h2 class="section-title">Features</h2>
+
+            <ion-list lines="none">
+                <ion-item>
+                    <div slot="start" class="icon-circle icon-circle-primary">
+                        <ion-icon name="code-slash-outline"></ion-icon>
+                    </div>
+                    <ion-label>
+                        <h3 style="font-weight: 600;">Tree-shakeable</h3>
+                        <p style="color: var(--app-text-secondary);">Only the components you use are bundled</p>
+                    </ion-label>
+                </ion-item>
+                <ion-item>
+                    <div slot="start" class="icon-circle icon-circle-success">
+                        <ion-icon name="flash-outline"></ion-icon>
+                    </div>
+                    <ion-label>
+                        <h3 style="font-weight: 600;">Signal-based</h3>
+                        <p style="color: var(--app-text-secondary);">Fine-grained reactivity, no virtual DOM</p>
+                    </ion-label>
+                </ion-item>
+                <ion-item>
+                    <div slot="start" class="icon-circle icon-circle-warning">
+                        <ion-icon name="phone-portrait-outline"></ion-icon>
+                    </div>
+                    <ion-label>
+                        <h3 style="font-weight: 600;">Capacitor ready</h3>
+                        <p style="color: var(--app-text-secondary);">Optional native plugins, zero web cost</p>
+                    </ion-label>
+                </ion-item>
+                <ion-item>
+                    <div slot="start" class="icon-circle icon-circle-secondary">
+                        <ion-icon name="layers-outline"></ion-icon>
+                    </div>
+                    <ion-label>
+                        <h3 style="font-weight: 600;">Overlays</h3>
+                        <p style="color: var(--app-text-secondary);">Toast, alert, loading, picker, modal, popover</p>
+                    </ion-label>
+                </ion-item>
+                <ion-item>
+                    <div slot="start" class="icon-circle icon-circle-danger">
+                        <ion-icon name="navigate-outline"></ion-icon>
+                    </div>
+                    <ion-label>
+                        <h3 style="font-weight: 600;">Navigation</h3>
+                        <p style="color: var(--app-text-secondary);">Per-tab stacks, cache policies, TTL</p>
+                    </ion-label>
+                </ion-item>
+            </ion-list>
+
+            <div class="app-spacer"></div>
         `;
     }
 }

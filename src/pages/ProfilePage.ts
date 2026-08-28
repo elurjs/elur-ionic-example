@@ -1,20 +1,16 @@
 /**
- * ProfilePage — demonstrates:
- *   - Page-state persistence (opt-in, serializable only)
- *   - createModalController with Nix.js delegate
- *   - Reactive form state with signals
+ * ProfilePage — modern profile with hero gradient, stats, and edit modal.
  */
-import { html, signal, nixRouter } from "@deijose/nix-js";
+import { html, signal, elurRouter } from "@elurjs/core";
 import {
     IonPage,
     IonBackButton,
     createPageState,
-    createModalController,
+    createModal,
     type PageContext,
-} from "@deijose/nix-ionic";
+} from "@elurjs/ionic";
 
-// Modal controller with Nix.js delegate (mounts NixTemplate inside modal)
-const modal = createModalController();
+const modal = createModal();
 
 export class ProfilePage extends IonPage {
     private name = signal("");
@@ -22,8 +18,6 @@ export class ProfilePage extends IonPage {
     private bio = signal("");
     private saved = signal(false);
 
-    // Page-state controller — persists declared signals to localStorage.
-    // Signals are declared at construction time.
     private pageState = createPageState(
         "profile",
         {
@@ -31,7 +25,7 @@ export class ProfilePage extends IonPage {
             email: this.email,
             bio: this.bio,
         },
-        { storage: "local", namespace: "nix-ionic-example" },
+        { storage: "local", namespace: "elur-ionic-example" },
     );
 
     constructor(ctx: PageContext) {
@@ -39,15 +33,11 @@ export class ProfilePage extends IonPage {
     }
 
     override ionViewWillEnter() {
-        // Restore persisted state when entering the page
         this.pageState.restore();
-        console.log("[profile] restored state");
     }
 
     override ionViewWillLeave() {
-        // Save state before leaving
         this.pageState.save();
-        console.log("[profile] saved state");
     }
 
     private async showEditModal() {
@@ -62,49 +52,60 @@ export class ProfilePage extends IonPage {
                     </ion-toolbar>
                 </ion-header>
                 <ion-content class="ion-padding">
-                    <ion-item>
+                    <div style="padding: 8px 0 16px;">
+                        <ion-note color="medium">Update your profile information</ion-note>
+                    </div>
+                    <ion-item lines="full">
+                        <ion-icon slot="start" name="person-outline" color="primary"></ion-icon>
                         <ion-input
                             label="Name"
                             label-placement="stacked"
-                            .value=${() => this.name.value}
+                            placeholder="Your name"
+                            value=${() => this.name.value}
                             @ionInput=${(e: CustomEvent) => {
                     this.name.value = String((e.target as HTMLIonInputElement).value ?? "");
                 }}
                         ></ion-input>
                     </ion-item>
-                    <ion-item>
+                    <ion-item lines="full">
+                        <ion-icon slot="start" name="mail-outline" color="primary"></ion-icon>
                         <ion-input
                             label="Email"
                             label-placement="stacked"
                             type="email"
-                            .value=${() => this.email.value}
+                            placeholder="you@example.com"
+                            value=${() => this.email.value}
                             @ionInput=${(e: CustomEvent) => {
                     this.email.value = String((e.target as HTMLIonInputElement).value ?? "");
                 }}
                         ></ion-input>
                     </ion-item>
-                    <ion-item>
+                    <ion-item lines="full">
+                        <ion-icon slot="start" name="document-text-outline" color="primary"></ion-icon>
                         <ion-textarea
                             label="Bio"
                             label-placement="stacked"
                             rows="3"
-                            .value=${() => this.bio.value}
+                            placeholder="Tell us about yourself"
+                            value=${() => this.bio.value}
                             @ionInput=${(e: CustomEvent) => {
                     this.bio.value = String((e.target as HTMLIonTextareaElement).value ?? "");
                 }}
                         ></ion-textarea>
                     </ion-item>
-                    <ion-button
-                        expand="block"
-                        class="ion-margin-top"
-                        @click=${() => {
+                    <div style="padding: 24px 0;">
+                        <ion-button
+                            expand="block"
+                            @click=${() => {
                     this.pageState.save();
                     this.saved.value = true;
                     modal.dismiss();
                 }}
-                    >
-                        Save Changes
-                    </ion-button>
+                        >
+                            <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+                            Save Changes
+                        </ion-button>
+                    </div>
                 </ion-content>
             `,
             presentingElement: document.querySelector("ion-router-outlet") ?? undefined,
@@ -112,7 +113,7 @@ export class ProfilePage extends IonPage {
     }
 
     override render() {
-        const isEdit = window.location.hash.includes("/edit");
+        const isEdit = window.location.pathname.includes("/edit");
 
         return html`
             <ion-header>
@@ -127,78 +128,97 @@ export class ProfilePage extends IonPage {
                     <ion-title>Profile</ion-title>
                 </ion-toolbar>
             </ion-header>
-            <ion-content class="ion-padding">
-                <div style="text-align: center; margin: 24px 0;">
-                    <ion-avatar style="margin: 0 auto 16px; width: 96px; height: 96px;">
-                        <div
-                            style="
-                                width: 100%; height: 100%;
-                                background: var(--ion-color-primary);
-                                display: flex; align-items: center; justify-content: center;
-                                color: white; font-size: 36px; font-weight: bold;
-                            "
-                        >
-                            ${() => (this.name.value ? this.name.value[0].toUpperCase() : "?")}
-                        </div>
-                    </ion-avatar>
-                    <h2>${() => this.name.value || "No name set"}</h2>
-                    <p style="color: var(--ion-color-medium);">
+            <ion-content>
+                <!-- Profile hero -->
+                <div class="hero-card" style="text-align: center;">
+                    <div class="app-avatar app-avatar-lg" style="margin: 0 auto 16px;">
+                        ${() => this.name.value ? this.name.value[0].toUpperCase() : "?"}
+                    </div>
+                    <h1 style="font-size: 22px; font-weight: 800;">
+                        ${() => this.name.value || "No name set"}
+                    </h1>
+                    <p style="font-size: 14px;">
                         ${() => this.email.value || "No email set"}
                     </p>
                 </div>
 
-                <ion-card>
-                    <ion-card-header>
-                        <ion-card-title>Bio</ion-card-title>
-                    </ion-card-header>
-                    <ion-card-content>
-                        ${() => this.bio.value || "No bio yet. Click edit to add one."}
-                    </ion-card-content>
-                </ion-card>
+                <!-- Stats -->
+                <div class="app-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--ion-color-primary);">
+                            ${() => this.bio.value.split(/\s+/).filter(Boolean).length}
+                        </div>
+                        <div class="stat-label">Words</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--ion-color-success);">
+                            ${() => (this.name.value ? 1 : 0)}
+                        </div>
+                        <div class="stat-label">Profile</div>
+                    </div>
+                </div>
 
                 ${() =>
                 this.saved.value
                     ? html`
-                            <ion-note color="success" class="ion-padding">
-                                <ion-icon name="checkmark-circle"></ion-icon>
-                                Profile saved!
-                            </ion-note>
+                            <div style="padding: 16px;">
+                                <ion-chip color="success" style="font-weight: 600;">
+                                    <ion-icon name="checkmark-circle"></ion-icon>
+                                    Profile saved!
+                                </ion-chip>
+                            </div>
                         `
                     : null}
 
-                <ion-button
-                    expand="block"
-                    class="ion-margin-top"
-                    @click=${() => this.showEditModal()}
-                >
-                    <ion-icon slot="start" name="create-outline"></ion-icon>
-                    Edit Profile (Modal)
-                </ion-button>
+                <!-- Bio card -->
+                <h2 class="section-title">About</h2>
+                <ion-card>
+                    <ion-card-content style="padding: 20px;">
+                        <p style="margin: 0; color: var(--app-text-primary); line-height: 1.6;">
+                            ${() => this.bio.value || "No bio yet. Click edit to add one."}
+                        </p>
+                    </ion-card-content>
+                </ion-card>
 
-                <ion-button
-                    expand="block"
-                    fill="outline"
-                    class="ion-margin-top"
-                    @click=${() => nixRouter().navigate("/profile/edit")}
-                >
-                    Edit Page (pushed)
-                </ion-button>
-
-                <ion-button
-                    expand="block"
-                    fill="clear"
-                    color="danger"
-                    class="ion-margin-top"
-                    @click=${() => {
+                <!-- Actions -->
+                <div style="padding: 8px 16px;">
+                    <ion-button
+                        expand="block"
+                        @click=${() => this.showEditModal()}
+                    >
+                        <ion-icon slot="start" name="create-outline"></ion-icon>
+                        Edit Profile (Modal)
+                    </ion-button>
+                </div>
+                <div style="padding: 8px 16px;">
+                    <ion-button
+                        expand="block"
+                        fill="outline"
+                        @click=${() => elurRouter().navigate("/profile/edit")}
+                    >
+                        <ion-icon slot="start" name="arrow-forward-outline"></ion-icon>
+                        Edit Page (pushed)
+                    </ion-button>
+                </div>
+                <div style="padding: 8px 16px;">
+                    <ion-button
+                        expand="block"
+                        fill="clear"
+                        color="danger"
+                        @click=${() => {
                 this.pageState.clear();
                 this.name.value = "";
                 this.email.value = "";
                 this.bio.value = "";
                 this.saved.value = false;
             }}
-                >
-                    Clear Saved Data
-                </ion-button>
+                    >
+                        <ion-icon slot="start" name="trash-outline"></ion-icon>
+                        Clear Saved Data
+                    </ion-button>
+                </div>
+
+                <div class="app-spacer"></div>
             </ion-content>
         `;
     }

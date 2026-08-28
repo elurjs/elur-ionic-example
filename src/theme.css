@@ -1,0 +1,410 @@
+/* =============================================================
+ * elur-ionic-example — Theme
+ *
+ * Modern fintech-dashboard inspired design with:
+ * - Indigo/violet primary palette
+ * - Gradient hero sections
+ * - Card-based layouts with soft shadows
+ * - Dark mode support
+ * - Smooth transitions
+ * ============================================================= */
+
+/* --- Color palette --- */
+:root {
+    /* Primary — vibrant indigo */
+    --ion-color-primary: #6366f1;
+    --ion-color-primary-rgb: 99, 102, 241;
+    --ion-color-primary-contrast: #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade: #5759d4;
+    --ion-color-primary-tint: #7375f2;
+
+    /* Secondary — teal */
+    --ion-color-secondary: #14b8a6;
+    --ion-color-secondary-rgb: 20, 184, 166;
+    --ion-color-secondary-contrast: #ffffff;
+    --ion-color-secondary-contrast-rgb: 255, 255, 255;
+    --ion-color-secondary-shade: #12a290;
+    --ion-color-secondary-tint: #2bbfae;
+
+    /* Tertiary — amber */
+    --ion-color-tertiary: #f59e0b;
+    --ion-color-tertiary-rgb: 245, 158, 11;
+    --ion-color-tertiary-contrast: #ffffff;
+    --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+    --ion-color-tertiary-shade: #d88b0a;
+    --ion-color-tertiary-tint: #f6a823;
+
+    /* Success — emerald */
+    --ion-color-success: #10b981;
+    --ion-color-success-rgb: 16, 185, 129;
+    --ion-color-success-contrast: #ffffff;
+    --ion-color-success-contrast-rgb: 255, 255, 255;
+    --ion-color-success-shade: #0ea372;
+    --ion-color-success-tint: #28c08e;
+
+    /* Warning — orange */
+    --ion-color-warning: #f97316;
+    --ion-color-warning-rgb: 249, 115, 22;
+    --ion-color-warning-contrast: #ffffff;
+    --ion-color-warning-contrast-rgb: 255, 255, 255;
+    --ion-color-warning-shade: #db660f;
+    --ion-color-warning-tint: #fa812e;
+
+    /* Danger — rose */
+    --ion-color-danger: #f43f5e;
+    --ion-color-danger-rgb: 244, 63, 94;
+    --ion-color-danger-contrast: #ffffff;
+    --ion-color-danger-contrast-rgb: 255, 255, 255;
+    --ion-color-danger-shade: #d63853;
+    --ion-color-danger-tint: #f5556e;
+
+    /* App-specific vars */
+    --app-tab-bg: #ffffff;
+    --app-tab-inactive: #94a3b8;
+    --app-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    --app-card-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --app-header-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+    --app-hero-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --app-hero-gradient-2: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+    --app-hero-gradient-3: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    --app-hero-gradient-4: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+    --app-bg: #f1f5f9;
+    --app-surface: #ffffff;
+    --app-text-primary: #1e293b;
+    --app-text-secondary: #64748b;
+    --app-border: rgba(0, 0, 0, 0.06);
+    --app-radius: 20px;
+    --app-radius-sm: 12px;
+
+    /* Background */
+    --ion-background-color: var(--app-bg);
+    --ion-background-color-rgb: 241, 245, 249;
+    --ion-text-color: var(--app-text-primary);
+    --ion-text-color-rgb: 30, 41, 59;
+    --ion-card-background: var(--app-surface);
+    --ion-item-background: var(--app-surface);
+    --ion-toolbar-background: var(--app-surface);
+}
+
+/* --- Dark mode (class-based) --- */
+.ion-palette-dark {
+    --app-tab-bg: #1e293b;
+    --app-tab-inactive: #64748b;
+    --app-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    --app-card-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.5);
+    --app-header-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+    --app-hero-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --app-hero-gradient-2: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+    --app-hero-gradient-3: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+    --app-hero-gradient-4: linear-gradient(135deg, #e11d48 0%, #db2777 100%);
+    --app-bg: #0f172a;
+    --app-surface: #1e293b;
+    --app-text-primary: #f1f5f9;
+    --app-text-secondary: #94a3b8;
+    --app-border: rgba(255, 255, 255, 0.08);
+
+    --ion-background-color: var(--app-bg);
+    --ion-background-color-rgb: 15, 23, 42;
+    --ion-text-color: var(--app-text-primary);
+    --ion-text-color-rgb: 241, 245, 249;
+    --ion-card-background: var(--app-surface);
+    --ion-item-background: var(--app-surface);
+    --ion-toolbar-background: var(--app-surface);
+}
+
+/* --- Toolbar with gradient --- */
+ion-toolbar[color="primary"] {
+    --background: var(--app-header-gradient);
+    --color: #ffffff;
+    --min-height: 56px;
+    --border-color: transparent;
+}
+
+/* --- Cards --- */
+ion-card {
+    box-shadow: var(--app-card-shadow);
+    border-radius: var(--app-radius);
+    overflow: hidden;
+    margin: 12px 16px;
+    background: var(--app-surface);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+ion-card:active {
+    transform: scale(0.98);
+}
+
+ion-card-header {
+    padding-bottom: 8px;
+}
+
+/* --- Hero gradient cards --- */
+.hero-card {
+    border-radius: var(--app-radius);
+    padding: 24px;
+    color: #fff;
+    background: var(--app-hero-gradient);
+    margin: 16px;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-card h1,
+.hero-card h2,
+.hero-card h3 {
+    color: #fff;
+    margin: 0 0 4px;
+}
+
+.hero-card p {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+}
+
+/* --- Stat cards --- */
+.stat-card {
+    border-radius: var(--app-radius-sm);
+    padding: 16px;
+    background: var(--app-surface);
+    box-shadow: var(--app-card-shadow);
+    text-align: center;
+}
+
+.stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin: 4px 0;
+}
+
+.stat-card .stat-label {
+    font-size: 12px;
+    color: var(--app-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* --- Grid helper --- */
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0 16px;
+}
+
+.app-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 0 16px;
+}
+
+/* --- Section headers --- */
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--app-text-primary);
+    padding: 20px 16px 8px;
+    margin: 0;
+}
+
+.section-subtitle {
+    font-size: 13px;
+    color: var(--app-text-secondary);
+    padding: 0 16px 12px;
+    margin: 0;
+}
+
+/* --- Lists --- */
+ion-list {
+    background: var(--app-surface);
+    border-radius: var(--app-radius);
+    overflow: hidden;
+    margin: 8px 16px;
+    box-shadow: var(--app-card-shadow);
+}
+
+ion-list-header {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    font-size: 12px;
+    opacity: 0.6;
+    min-height: 40px;
+}
+
+ion-item {
+    --background: var(--app-surface);
+    --border-color: var(--app-border);
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    --min-height: 56px;
+    transition: --background 0.2s ease;
+}
+
+ion-item.item-label-stacked {
+    --min-height: 64px;
+}
+
+/* --- Buttons --- */
+ion-button {
+    --border-radius: var(--app-radius-sm);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    --box-shadow: none;
+    text-transform: none;
+}
+
+ion-button[color="primary"] {
+    --box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* --- Searchbar --- */
+ion-searchbar {
+    --border-radius: var(--app-radius-sm);
+    --box-shadow: var(--app-card-shadow);
+    --background: var(--app-surface);
+    padding: 8px 16px;
+}
+
+/* --- Inputs --- */
+ion-input,
+ion-textarea {
+    --border-radius: var(--app-radius-sm);
+}
+
+/* --- Content --- */
+ion-content {
+    --padding-start: 0;
+    --padding-end: 0;
+    --background: var(--app-bg);
+}
+
+/* --- Tab bar --- */
+ion-tab-bar {
+    border-top: 1px solid var(--app-border);
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
+    background: var(--app-tab-bg);
+}
+
+/* --- Avatar --- */
+.app-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--app-hero-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 auto;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.app-avatar-lg {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+}
+
+/* --- Badge --- */
+ion-badge {
+    font-weight: 700;
+    font-size: 11px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* --- Chip --- */
+ion-chip {
+    --border-radius: 8px;
+    font-weight: 600;
+}
+
+/* --- Progress bar --- */
+ion-progress-bar {
+    --progress-background: var(--ion-color-primary);
+    height: 6px;
+    border-radius: 3px;
+}
+
+/* --- Icon circle --- */
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.icon-circle-primary {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--ion-color-primary);
+}
+
+.icon-circle-success {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--ion-color-success);
+}
+
+.icon-circle-warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--ion-color-warning);
+}
+
+.icon-circle-danger {
+    background: rgba(244, 63, 94, 0.12);
+    color: var(--ion-color-danger);
+}
+
+.icon-circle-secondary {
+    background: rgba(20, 184, 166, 0.12);
+    color: var(--ion-color-secondary);
+}
+
+/* --- Note --- */
+ion-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- Smooth transitions --- */
+ion-item {
+    transition: background-color 0.2s ease;
+}
+
+/* --- Empty state --- */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.empty-state ion-icon {
+    font-size: 56px;
+    color: var(--app-text-secondary);
+    opacity: 0.4;
+    margin-bottom: 12px;
+}
+
+.empty-state h3 {
+    color: var(--app-text-primary);
+    margin: 0 0 4px;
+}
+
+.empty-state p {
+    color: var(--app-text-secondary);
+    margin: 0;
+}
+
+/* --- Spacer --- */
+.app-spacer {
+    height: 24px;
+}

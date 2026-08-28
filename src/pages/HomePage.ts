@@ -1,7 +1,7 @@
 /**
- * HomePage — demonstrates all overlay types and navigation.
+ * HomePage — modern dashboard design with hero card, stats, and overlay demos.
  */
-import { html, signal, nixRouter } from "@deijose/nix-js";
+import { html, signal, effect, elurRouter } from "@elurjs/core";
 import {
     IonPage,
     createToast,
@@ -13,9 +13,8 @@ import {
     withLoading,
     confirm,
     type PageContext,
-} from "@deijose/nix-ionic";
+} from "@elurjs/ionic";
 
-// Overlay handles — created once, reused across presentations
 const toast = createToast();
 const alert = createAlert();
 const loading = createLoading();
@@ -25,10 +24,31 @@ const popover = createPopover();
 
 export class HomePage extends IonPage {
     private lastResult = signal<string>("none");
-    private pickerValue = signal<string>("red");
+    private pickerValue = signal<string>("Red");
 
     constructor(ctx: PageContext) {
         super(ctx.lc);
+    }
+
+    override onMount() {
+        effect(() => {
+            const r = alert.result.value as { role?: string } | null;
+            if (r) this.lastResult.value = `alert: ${r.role ?? "unknown"}`;
+        });
+
+        effect(() => {
+            const r = actionSheet.result.value as { role?: string } | null;
+            if (r) this.lastResult.value = `action-sheet: ${r.role ?? "unknown"}`;
+        });
+
+        effect(() => {
+            const r = picker.result.value as { role?: string; data?: any } | null;
+            if (r) {
+                const col = r.data?.color;
+                if (col) this.pickerValue.value = col.text ?? col.value ?? "unknown";
+                this.lastResult.value = `picker: ${this.pickerValue.value}`;
+            }
+        });
     }
 
     override ionViewWillEnter() {
@@ -41,30 +61,27 @@ export class HomePage extends IonPage {
 
     private async showToast() {
         await toast.present({
-            message: "Hello from nix-ionic!",
+            message: "Hello from elur-ionic!",
             duration: 2000,
             color: "primary",
             position: "bottom",
+            icon: "sparkles-outline",
         });
     }
 
     private async showAlert() {
         await alert.present({
-            header: "Confirm",
-            message: "Are you sure you want to proceed?",
+            header: "Confirm Action",
+            message: "Are you sure you want to proceed with this operation?",
             buttons: [
                 { text: "Cancel", role: "cancel" },
                 { text: "OK", role: "confirm" },
             ],
         });
-        // result signal updates when the alert is dismissed
-        const role = (alert.result.value as { role?: string } | null)?.role ?? "unknown";
-        this.lastResult.value = `alert: ${role}`;
     }
 
     private async showLoading() {
         await loading.present({ message: "Loading...", spinner: "crescent" });
-        // Auto-dismiss after 1.5s
         setTimeout(() => loading.dismiss(), 1500);
     }
 
@@ -73,12 +90,10 @@ export class HomePage extends IonPage {
             header: "Choose an action",
             buttons: [
                 { text: "Delete", role: "destructive" },
-                { text: "Share" },
+                { text: "Share", role: "sharing" },
                 { text: "Cancel", role: "cancel" },
             ],
         });
-        const role = (actionSheet.result.value as { role?: string } | null)?.role ?? "unknown";
-        this.lastResult.value = `action-sheet: ${role}`;
     }
 
     private async showPicker() {
@@ -98,7 +113,6 @@ export class HomePage extends IonPage {
                 { text: "Done", role: "confirm" },
             ],
         });
-        this.lastResult.value = `picker: ${this.pickerValue.value}`;
     }
 
     private async showPopover(event: Event) {
@@ -106,16 +120,34 @@ export class HomePage extends IonPage {
             event,
             translucent: true,
             component: () => html`
-                <div style="padding: 16px;">
-                    <p style="margin: 0 0 8px; font-weight: bold;">Popover from Nix.js</p>
-                    <ion-button size="small" @click=${() => popover.dismiss()}>Close</ion-button>
+                <div style="padding: 20px; min-width: 200px;">
+                    <p style="margin: 0 0 12px; font-weight: 700; font-size: 16px;">
+                        Quick Actions
+                    </p>
+                    <ion-button
+                        size="small"
+                        expand="block"
+                        fill="clear"
+                        @click=${() => popover.dismiss()}
+                    >
+                        <ion-icon slot="start" name="share-outline"></ion-icon>
+                        Share
+                    </ion-button>
+                    <ion-button
+                        size="small"
+                        expand="block"
+                        fill="clear"
+                        @click=${() => popover.dismiss()}
+                    >
+                        <ion-icon slot="start" name="link-outline"></ion-icon>
+                        Copy Link
+                    </ion-button>
                 </div>
             `,
         });
     }
 
     private async doAsyncWork() {
-        // withLoading: presents loading, runs task, auto-dismisses on settle/error
         await withLoading(
             { message: "Fetching data..." },
             async () => {
@@ -126,7 +158,6 @@ export class HomePage extends IonPage {
     }
 
     private async doConfirm() {
-        // confirm(): promise-based confirm dialog
         const ok = await confirm({
             header: "Delete item",
             message: "This action cannot be undone.",
@@ -140,67 +171,161 @@ export class HomePage extends IonPage {
         return html`
             <ion-header>
                 <ion-toolbar color="primary">
-                    <ion-title>Home</ion-title>
+                    <ion-title>elur-ionic</ion-title>
+                    <ion-buttons slot="end">
+                        <ion-button @click=${(e: Event) => this.showPopover(e)}>
+                            <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+                        </ion-button>
+                    </ion-buttons>
                 </ion-toolbar>
             </ion-header>
-            <ion-content class="ion-padding">
-                <h2>nix-ionic Example</h2>
-                <p>Last result: <strong>${() => this.lastResult.value}</strong></p>
-                <p>Picker value: <strong>${() => this.pickerValue.value}</strong></p>
+            <ion-content>
+                <!-- Hero card -->
+                <div class="hero-card">
+                    <h1 style="font-size: 24px; font-weight: 800;">Welcome back</h1>
+                    <p style="font-size: 15px;">Explore the elur-ionic features</p>
+                    <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <ion-chip style="--background: rgba(255,255,255,0.2); color: #fff;">
+                            <ion-icon name="flash-outline"></ion-icon>
+                            Signal-based
+                        </ion-chip>
+                        <ion-chip style="--background: rgba(255,255,255,0.2); color: #fff;">
+                            <ion-icon name="leaf-outline"></ion-icon>
+                            Tree-shakeable
+                        </ion-chip>
+                    </div>
+                </div>
+
+                <!-- Stats grid -->
+                <div class="app-grid-3">
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--ion-color-primary);">7</div>
+                        <div class="stat-label">Overlays</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--ion-color-success);">4</div>
+                        <div class="stat-label">Tabs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--ion-color-warning);">2.0</div>
+                        <div class="stat-label">Version</div>
+                    </div>
+                </div>
+
+                <!-- Last result -->
+                ${() =>
+                this.lastResult.value !== "none"
+                    ? html`
+                            <div style="padding: 16px; margin-top: 8px;">
+                                <ion-chip color="primary" style="font-weight: 600;">
+                                    <ion-icon name="checkmark-circle-outline"></ion-icon>
+                                    ${() => this.lastResult.value}
+                                </ion-chip>
+                            </div>
+                        `
+                    : null}
+
+                <!-- Overlays section -->
+                <h2 class="section-title">Overlays</h2>
+                <p class="section-subtitle">Toast, alert, loading, action sheet, picker, popover</p>
 
                 <ion-list lines="full">
                     <ion-item button detail @click=${() => this.showToast()}>
-                        <ion-icon slot="start" name="toast-outline"></ion-icon>
-                        <ion-label>Show Toast</ion-label>
+                        <div slot="start" class="icon-circle icon-circle-primary">
+                            <ion-icon name="chatbubble-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">Toast</h3>
+                            <p style="color: var(--app-text-secondary);">Quick message</p>
+                        </ion-label>
                     </ion-item>
 
                     <ion-item button detail @click=${() => this.showAlert()}>
-                        <ion-icon slot="start" name="alert-circle-outline"></ion-icon>
-                        <ion-label>Show Alert</ion-label>
+                        <div slot="start" class="icon-circle icon-circle-warning">
+                            <ion-icon name="alert-circle-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">Alert</h3>
+                            <p style="color: var(--app-text-secondary);">Confirm dialog</p>
+                        </ion-label>
                     </ion-item>
 
                     <ion-item button detail @click=${() => this.showLoading()}>
-                        <ion-icon slot="start" name="hourglass-outline"></ion-icon>
-                        <ion-label>Show Loading</ion-label>
+                        <div slot="start" class="icon-circle icon-circle-secondary">
+                            <ion-icon name="hourglass-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">Loading</h3>
+                            <p style="color: var(--app-text-secondary);">Spinner overlay</p>
+                        </ion-label>
                     </ion-item>
 
                     <ion-item button detail @click=${() => this.showActionSheet()}>
-                        <ion-icon slot="start" name="list-outline"></ion-icon>
-                        <ion-label>Show Action Sheet</ion-label>
+                        <div slot="start" class="icon-circle icon-circle-danger">
+                            <ion-icon name="list-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">Action Sheet</h3>
+                            <p style="color: var(--app-text-secondary);">Bottom sheet menu</p>
+                        </ion-label>
                     </ion-item>
 
                     <ion-item button detail @click=${() => this.showPicker()}>
-                        <ion-icon slot="start" name="color-palette-outline"></ion-icon>
-                        <ion-label>Show Picker</ion-label>
+                        <div slot="start" class="icon-circle icon-circle-primary">
+                            <ion-icon name="color-palette-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">Picker</h3>
+                            <p style="color: var(--app-text-secondary);">Column selector</p>
+                        </ion-label>
                     </ion-item>
 
-                    <ion-item
-                        button
-                        detail
-                        @click=${(e: Event) => this.showPopover(e)}
-                    >
-                        <ion-icon slot="start" name="ellipsis-vertical-outline"></ion-icon>
-                        <ion-label>Show Popover</ion-label>
+                    <ion-item button detail @click=${(e: Event) => this.showPopover(e)}>
+                        <div slot="start" class="icon-circle icon-circle-success">
+                            <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">Popover</h3>
+                            <p style="color: var(--app-text-secondary);">Floating menu</p>
+                        </ion-label>
                     </ion-item>
 
                     <ion-item button detail @click=${() => this.doAsyncWork()}>
-                        <ion-icon slot="start" name="cloud-download-outline"></ion-icon>
-                        <ion-label>withLoading() async task</ion-label>
+                        <div slot="start" class="icon-circle icon-circle-secondary">
+                            <ion-icon name="cloud-download-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">withLoading()</h3>
+                            <p style="color: var(--app-text-secondary);">Auto-dismiss task</p>
+                        </ion-label>
                     </ion-item>
 
                     <ion-item button detail @click=${() => this.doConfirm()}>
-                        <ion-icon slot="start" name="help-circle-outline"></ion-icon>
-                        <ion-label>confirm() promise dialog</ion-label>
+                        <div slot="start" class="icon-circle icon-circle-warning">
+                            <ion-icon name="help-circle-outline"></ion-icon>
+                        </div>
+                        <ion-label>
+                            <h3 style="font-weight: 600;">confirm()</h3>
+                            <p style="color: var(--app-text-secondary);">Promise dialog</p>
+                        </ion-label>
                     </ion-item>
                 </ion-list>
 
-                <ion-button
-                    expand="block"
-                    class="ion-margin-top"
-                    @click=${() => nixRouter().navigate("/detail/42")}
-                >
-                    Go to Detail (cached, TTL 30s)
-                </ion-button>
+                <!-- Navigation section -->
+                <h2 class="section-title">Navigation</h2>
+                <p class="section-subtitle">Cached routes with TTL, deep stacks</p>
+
+                <div style="padding: 0 16px;">
+                    <ion-button
+                        expand="block"
+                        @click=${() => elurRouter().navigate("/detail/42")}
+                    >
+                        <ion-icon slot="start" name="arrow-forward-circle-outline"></ion-icon>
+                        Go to Detail (TTL 30s)
+                    </ion-button>
+                </div>
+
+                <div class="app-spacer"></div>
             </ion-content>
         `;
     }

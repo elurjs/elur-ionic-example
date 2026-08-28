@@ -1,42 +1,48 @@
 /**
- * SearchPage — demonstrates:
- *   - Composables pattern (useIonView* instead of class-based)
- *   - Per-route cache policy (LRU max 5)
- *   - Reactive search with signal
+ * SearchPage — modern search with cards and icons.
  */
-import { html, signal, nixRouter } from "@deijose/nix-js";
+import { html, signal, elurRouter } from "@elurjs/core";
 import {
     useIonViewWillEnter,
     useIonViewDidLeave,
     type PageContext,
-} from "@deijose/nix-ionic";
+} from "@elurjs/ionic";
 
 const ALL_ITEMS = [
-    "Apple", "Banana", "Cherry", "Date", "Elderberry",
-    "Fig", "Grape", "Honeydew", "Kiwi", "Lemon",
-    "Mango", "Nectarine", "Orange", "Papaya", "Quince",
+    { name: "Apple", emoji: "🍎", color: "danger", category: "Fruit" },
+    { name: "Banana", emoji: "🍌", color: "warning", category: "Fruit" },
+    { name: "Cherry", emoji: "🍒", color: "danger", category: "Fruit" },
+    { name: "Date", emoji: "🌴", color: "tertiary", category: "Exotic" },
+    { name: "Elderberry", emoji: "🫐", color: "primary", category: "Berry" },
+    { name: "Fig", emoji: "🪴", color: "success", category: "Fruit" },
+    { name: "Grape", emoji: "🍇", color: "primary", category: "Fruit" },
+    { name: "Honeydew", emoji: "🍈", color: "success", category: "Melon" },
+    { name: "Kiwi", emoji: "🥝", color: "success", category: "Exotic" },
+    { name: "Lemon", emoji: "🍋", color: "warning", category: "Fruit" },
+    { name: "Mango", emoji: "🥭", color: "warning", category: "Exotic" },
+    { name: "Nectarine", emoji: "🍑", color: "danger", category: "Fruit" },
+    { name: "Orange", emoji: "🍊", color: "warning", category: "Fruit" },
+    { name: "Papaya", emoji: "🍐", color: "success", category: "Exotic" },
+    { name: "Quince", emoji: "🍋", color: "warning", category: "Fruit" },
 ];
 
 export function SearchPage(ctx: PageContext) {
     const query = signal("");
-    const results = signal<string[]>(ALL_ITEMS);
+    const results = signal(ALL_ITEMS);
     const searchCount = signal(0);
 
-    // Composable pattern: useIonView* hooks
     useIonViewWillEnter(ctx.lc, () => {
-        console.log("[search] ionViewWillEnter — restoring focus");
         searchCount.value++;
     });
 
     useIonViewDidLeave(ctx.lc, () => {
-        console.log("[search] ionViewDidLeave — state preserved by cache");
+        console.log("[search] state preserved by cache");
     });
 
-    // Reactive filter
     function performSearch() {
         const q = query.value.toLowerCase().trim();
         results.value = q
-            ? ALL_ITEMS.filter((item) => item.toLowerCase().includes(q))
+            ? ALL_ITEMS.filter((item) => item.name.toLowerCase().includes(q))
             : ALL_ITEMS;
     }
 
@@ -45,49 +51,70 @@ export function SearchPage(ctx: PageContext) {
             <ion-toolbar color="primary">
                 <ion-title>Search</ion-title>
             </ion-toolbar>
-            <ion-toolbar>
-                <ion-searchbar
-                    placeholder="Search fruits..."
-                    .value=${() => query.value}
-                    @ionInput=${(e: CustomEvent) => {
+        </ion-header>
+        <ion-content>
+            <ion-searchbar
+                placeholder="Search fruits..."
+                debounce="100"
+                @ionInput=${(e: CustomEvent) => {
             query.value = (e.target as HTMLIonSearchbarElement).value ?? "";
             performSearch();
         }}
-                ></ion-searchbar>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content>
-            <p class="ion-padding" style="color: var(--ion-color-medium);">
-                Searches performed: ${() => searchCount.value} ·
-                Results: ${() => results.value.length}
-            </p>
-            <ion-list>
-                ${() =>
-            results.value.map(
-                (item) => html`
-                            <ion-item
-                                button
-                                detail
-                                @click=${() => nixRouter().navigate(`/detail/${item.toLowerCase()}`)}
-                            >
-                                <ion-icon slot="start" name="nutrition-outline"></ion-icon>
-                                <ion-label>${item}</ion-label>
-                            </ion-item>
-                        `,
-            )}
-            </ion-list>
+            ></ion-searchbar>
+
+            <div style="padding: 8px 16px; display: flex; gap: 8px; align-items: center;">
+                <ion-chip color="primary" style="font-weight: 600;">
+                    <ion-icon name="search-outline"></ion-icon>
+                    ${() => results.value.length} results
+                </ion-chip>
+                <ion-chip color="medium" style="font-weight: 600;">
+                    <ion-icon name="eye-outline"></ion-icon>
+                    ${() => searchCount.value} visits
+                </ion-chip>
+            </div>
+
             ${() =>
             results.value.length === 0
                 ? html`
-                        <div class="ion-padding ion-text-center">
-                            <ion-icon
-                                name="search-outline"
-                                style="font-size: 48px; color: var(--ion-color-medium);"
-                            ></ion-icon>
-                            <p>No results found</p>
+                        <div class="empty-state">
+                            <ion-icon name="search-outline"></ion-icon>
+                            <h3>No results found</h3>
+                            <p>Try a different search term</p>
                         </div>
                     `
-                : null}
+                : html`
+                        <ion-list lines="full">
+                            ${() =>
+                        results.value.map(
+                            (item) => html`
+                                        <ion-item
+                                            button
+                                            detail
+                                            @click=${() => elurRouter().navigate(`/detail/${item.name.toLowerCase()}`)}
+                                        >
+                                            <div
+                                                slot="start"
+                                                class="icon-circle icon-circle-${item.color === "danger"
+                                    ? "danger"
+                                    : item.color === "warning"
+                                        ? "warning"
+                                        : item.color === "success"
+                                            ? "success"
+                                            : "primary"}"
+                                                style="font-size: 24px;"
+                                            >
+                                                ${item.emoji}
+                                            </div>
+                                            <ion-label>
+                                                <h3 style="font-weight: 600;">${item.name}</h3>
+                                                <p style="color: var(--app-text-secondary);">${item.category}</p>
+                                            </ion-label>
+                                        </ion-item>
+                                    `,
+                        )}
+                        </ion-list>
+                    `}
+            <div class="app-spacer"></div>
         </ion-content>
     `;
 }

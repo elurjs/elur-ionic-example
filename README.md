@@ -1,15 +1,15 @@
-# nix-ionic-example
+# elur-ionic-example
 
 Complete example app demonstrating the recommended patterns for
-`@deijose/nix-ionic` 2.0.0 — tabs, overlays, cache policies, page-state
+`@elurjs/ionic` 2.0.0 — tabs, overlays, cache policies, page-state
 persistence, and optional Capacitor.
 
 ## What this app demonstrates
 
 | Feature | Where |
 | --- | --- |
-| **Vite plugin auto-registration** | `vite.config.ts` + `src/main.ts` (`virtual:nix-ionic/registration`) — see below |
-| **initializeNixIonic + registerIonicComponents** | `src/main.ts` (via virtual module) |
+| **Vite plugin auto-registration** | `vite.config.ts` + `src/main.ts` (`virtual:elur-ionic/registration`) — see below |
+| **initializeElurIonic + registerIonicComponents** | `src/main.ts` (via virtual module) |
 | **IonRouterOutlet with tabs** | `src/main.ts` |
 | **NavigationManager with hooks** | `src/main.ts` (`beforeNav`, `afterNav`, `onTabChange`) |
 | **Cache policies (LRU/FIFO/TTL)** | `src/main.ts` (outlet-level + per-route) |
@@ -18,7 +18,7 @@ persistence, and optional Capacitor.
 | **Composables pattern** | `SearchPage` (`useIonViewWillEnter`, `useIonViewDidLeave`) |
 | **IonBackButton** | `DetailPage`, `ProfilePage`, `SettingsPage` |
 | **All overlays** | `HomePage` (toast, alert, loading, action-sheet, picker, popover) |
-| **createModalController + Nix.js delegate** | `ProfilePage` (edit modal) |
+| **createModalController + Elur delegate** | `ProfilePage` (edit modal) |
 | **withLoading() helper** | `HomePage` (async task with auto loading spinner) |
 | **confirm() helper** | `HomePage` (promise-based confirm dialog) |
 | **Page-state persistence** | `ProfilePage` (localStorage, serializable signals) |
@@ -33,16 +33,16 @@ persistence, and optional Capacitor.
 ## Setup
 
 ```bash
-cd nix-ionic-example
+cd elur-ionic-example
 npm install
 npm run dev
 ```
 
 Open http://localhost:3000
 
-## What is `virtual:nix-ionic/registration`?
+## What is `virtual:elur-ionic/registration`?
 
-It's a **virtual module** generated in memory by the `nixIonic()` Vite plugin.
+It's a **virtual module** generated in memory by the `elurIonic()` Vite plugin.
 It is not a physical file — Vite generates it during the build.
 
 The plugin scans all your `html\`\`` templates for `<ion-*>` tags and
@@ -50,34 +50,34 @@ The plugin scans all your `html\`\`` templates for `<ion-*>` tags and
 that imports **only** the components and icons you actually use:
 
 ```ts
-// virtual:nix-ionic/registration (generated in memory)
-import { initializeNixIonic, registerIonicComponents, registerIonicons } from "@deijose/nix-ionic";
-import { defineIonButton } from "@deijose/nix-ionic/components/button";
-import { defineIonContent } from "@deijose/nix-ionic/components/content";
+// virtual:elur-ionic/registration (generated in memory)
+import { initializeElurIonic, registerIonicComponents, registerIonicons } from "@elurjs/ionic";
+import { defineIonButton } from "@elurjs/ionic/components/button";
+import { defineIonContent } from "@elurjs/ionic/components/content";
 // ... only the components detected in your templates
 
 import { home } from "ionicons/icons/home";
 import { search } from "ionicons/icons/search";
 // ... only the icons detected
 
-initializeNixIonic();
+initializeElurIonic();
 registerIonicComponents(defineIonButton, defineIonContent, ...);
 registerIonicons({ home, search, ... });
 ```
 
-Your `import "virtual:nix-ionic/registration"` runs all of that automatically.
+Your `import "virtual:elur-ionic/registration"` runs all of that automatically.
 
 **Core tags** (`ion-app`, `ion-router-outlet`, `ion-back-button`, `ion-icon`)
-are skipped — they're already registered by `initializeNixIonic()`.
+are skipped — they're already registered by `initializeElurIonic()`.
 
 **Without the plugin** (manual alternative):
 
 ```ts
-import { initializeNixIonic, registerIonicComponents } from "@deijose/nix-ionic";
-import { defineIonButton } from "@deijose/nix-ionic/components/button";
-import { defineIonContent } from "@deijose/nix-ionic/components/content";
+import { initializeElurIonic, registerIonicComponents } from "@elurjs/ionic";
+import { defineIonButton } from "@elurjs/ionic/components/button";
+import { defineIonContent } from "@elurjs/ionic/components/content";
 
-initializeNixIonic();
+initializeElurIonic();
 registerIonicComponents(defineIonButton, defineIonContent);
 ```
 
@@ -91,11 +91,11 @@ npm run preview
 ## Architecture
 
 ```
-nix-ionic-example/
+elur-ionic-example/
 ├── index.html
 ├── package.json
 ├── tsconfig.json
-├── vite.config.ts          # nixIonic() Vite plugin
+├── vite.config.ts          # elurIonic() Vite plugin
 └── src/
     ├── main.ts             # Setup, router, NavigationManager, tabs, App
     └── pages/
@@ -104,7 +104,7 @@ nix-ionic-example/
         ├── ProfilePage.ts  # Page-state persistence + modal delegate
         ├── SettingsPage.ts # cache: false + form controls
         ├── DetailPage.ts   # Route params + TTL cache + pull-to-refresh
-        └── ModalContentPage.ts  # NixTemplate inside modal
+        └── ModalContentPage.ts  # ElurTemplate inside modal
 ```
 
 ## Recommended patterns
@@ -113,19 +113,19 @@ nix-ionic-example/
 
 ```ts
 // vite.config.ts
-import { nixIonic } from "@deijose/nix-ionic/vite-plugin";
+import { elurIonic } from "@elurjs/ionic/vite-plugin";
 
 export default {
-    plugins: [nixIonic()],
+    plugins: [elurIonic()],
 };
 
 // src/main.ts
-import "virtual:nix-ionic/registration";
+import "virtual:elur-ionic/registration";
 ```
 
 The plugin scans `html\`\`` templates for `<ion-*>` tags and `name="icon"`
 attributes, then generates a virtual module that imports only what you use
-and calls `initializeNixIonic()` + `registerIonicComponents()`.
+and calls `initializeElurIonic()` + `registerIonicComponents()`.
 
 ### 2. Use NavigationManager for hooks
 
@@ -169,7 +169,7 @@ state.save();
 ### 5. Keep Capacitor optional
 
 ```ts
-import { isNative, createCapacitorApp } from "@deijose/nix-ionic/capacitor";
+import { isNative, createCapacitorApp } from "@elurjs/ionic/capacitor";
 
 if (isNative()) {
     await createCapacitorApp({ statusBar: { style: "dark" } });
