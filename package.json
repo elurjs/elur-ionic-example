@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@elurjs/ionic": "^2.1.1",
-    "@elurjs/core": "^4.0.0",
+    "@elurjs/core": "^4.0.1",
     "@ionic/core": "^8.0.0",
     "ionicons": "^8.0.0"
   },
